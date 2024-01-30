@@ -9,7 +9,7 @@ describe("Mocha", () => {
   describe("Success", () =>
     describe("List", () => {
       it("should map the values", () =>
-        Assert.deepEqual(Array.map([1, 2, 3], (i) => i * 2), [2, 4, 6])
+        Assert.deepStrictEqual(Array.map([1, 2, 3], (i) => i * 2), [2, 4, 6])
       )
 
       it("should work with an empty list", () => Assert.deepEqual(Array.map([], (i) => i * 2), []))

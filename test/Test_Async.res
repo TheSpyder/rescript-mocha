@@ -7,9 +7,9 @@ describe("Async", () => {
 
   describe("Success", () =>
     it("should be successful", done_ => Js.Global.setTimeout(() => {
-        Assert.equal(3, 3)
+        Assert.strictEqual(3, 3)
         done_()
-      }, 500) |> ignore)
+      }, 500)->ignore)
   )
 
   describe("Error", () =>
@@ -90,12 +90,10 @@ describe("Async", () => {
 
   describe("Timeout", () => {
     it_skip("should time out", ~timeout=50, done_ =>
-      Js.Global.setTimeout(() => done_(), 51) |> ignore
+      Js.Global.setTimeout(() => done_(), 51)->ignore
     )
 
-    it("should not time out", ~timeout=50, done_ =>
-      Js.Global.setTimeout(() => done_(), 40) |> ignore
-    )
+    it("should not time out", ~timeout=50, done_ => Js.Global.setTimeout(() => done_(), 40)->ignore)
   })
 
   describe("Retries", () => {
@@ -115,7 +113,7 @@ describe("Async", () => {
 
   describe("Slow", () =>
     it("should be considered slow", ~slow=50, done_ =>
-      Js.Global.setTimeout(() => done_(), 40) |> ignore
+      Js.Global.setTimeout(() => done_(), 40)->ignore
     )
   )
 })

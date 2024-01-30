@@ -1,20 +1,20 @@
 type rec mocha
-and done_callback = Js.Nullable.t<Js.Exn.t> => unit
-and test_fn<'arg, 'result> = (string, @this (mocha, 'arg) => 'result) => unit
+and doneCallback = Js.Nullable.t<Js.Exn.t> => unit
+and testFunction<'arg, 'result> = (string, @this (mocha, 'arg) => 'result) => unit
 
-module Fn_Type = {
+module FunctionType = {
   /* Internal representation of mocha test functions */
   type rec internal_callback = (
     . string,
-    @this (mocha, done_callback) => unit,
+    @this (mocha, doneCallback) => unit,
   ) => unit
-  and internal_callback_anon = (. @this (mocha, done_callback) => unit) => unit
+  and internal_callback_anon = (. @this (mocha, doneCallback) => unit) => unit
   /* Internal representation with `unit => unit` callback (special-cased to
    ensure compiled JS is a nullary function) */
   and internal_nullary<'result> = (. string, @this (mocha => 'result)) => unit
   and internal_anon<'result> = (. @this (mocha => 'result)) => unit
   /* Nicer representation of mocha test functions */
-  and fn_anon<'arg, 'result> = (
+  and hookFunction<'arg, 'result> = (
     ~timeout: int=?,
     ~retries: int=?,
     ~slow: int=?,
@@ -35,7 +35,6 @@ module This = {
   @send external timeout: (mocha, int) => unit = "timeout"
   @send external retries: (mocha, int) => unit = "retries"
   @send external slow: (mocha, int) => unit = "slow"
-  @send external skip: (mocha, unit) => unit = "skip"
 }
 
 module Sync = {
@@ -63,21 +62,21 @@ module Sync = {
 
 module Async = {
   @val
-  external it: (. string, @this (mocha, done_callback) => unit) => unit = "it"
+  external it: (. string, @this (mocha, doneCallback) => unit) => unit = "it"
   @val
-  external it_only: (. string, @this (mocha, done_callback) => unit) => unit =
+  external it_only: (. string, @this (mocha, doneCallback) => unit) => unit =
     "it.only"
   @val
-  external it_skip: (. string, @this (mocha, done_callback) => unit) => unit =
+  external it_skip: (. string, @this (mocha, doneCallback) => unit) => unit =
     "it.skip"
   @val
-  external before: (. @this (mocha, done_callback) => unit) => unit = "before"
+  external before: (. @this (mocha, doneCallback) => unit) => unit = "before"
   @val
-  external after: (. @this (mocha, done_callback) => unit) => unit = "after"
+  external after: (. @this (mocha, doneCallback) => unit) => unit = "after"
   @val
-  external beforeEach: (. @this (mocha, done_callback) => unit) => unit = "beforeEach"
+  external beforeEach: (. @this (mocha, doneCallback) => unit) => unit = "beforeEach"
   @val
-  external afterEach: (. @this (mocha, done_callback) => unit) => unit = "afterEach"
+  external afterEach: (. @this (mocha, doneCallback) => unit) => unit = "afterEach"
 }
 
 module Promise = {
@@ -114,52 +113,52 @@ module Promise = {
   }
 )
 /* Wraps the options normally set with `this` in mocha and makes them optional arguments */
-let make: Fn_Type.internal_nullary<'result> => Fn_Type.test<unit, 'result> = (
+let makeTest: FunctionType.internal_nullary<'result> => FunctionType.test<unit, 'result> = (
   fn,
   description,
   ~timeout=?,
   ~retries=?,
   ~slow=?,
-  done_callback,
+  doneCallback,
 ) =>
   fn(.description, @this mocha => {
     applyOptions(~timeout?, ~retries?, ~slow?, mocha)
-    done_callback()
+    doneCallback()
   })
-let makeAnon: Fn_Type.internal_anon<'result> => Fn_Type.fn_anon<unit, 'result> = (
+let makeHook: FunctionType.internal_anon<'result> => FunctionType.hookFunction<unit, 'result> = (
   fn,
   ~timeout=?,
   ~retries=?,
   ~slow=?,
-  done_callback,
+  doneCallback,
 ) =>
   fn(.@this mocha => {
     applyOptions(~timeout?, ~retries?, ~slow?, mocha)
-    done_callback()
+    doneCallback()
   })
 
-let makeAsync: Fn_Type.internal_callback => Fn_Type.test<(~error: Js.Exn.t=?, unit) => unit, unit> = (
+let makeAsyncTest: FunctionType.internal_callback => FunctionType.test<(~error: Js.Exn.t=?, unit) => unit, unit> = (
   fn,
   description,
   ~timeout=?,
   ~retries=?,
   ~slow=?,
-  done_callback,
+  doneCallback,
 ) =>
-  fn(.description, @this (mocha, done_callback') => {
+  fn(.description, @this (mocha, doneCallback') => {
     applyOptions(~timeout?, ~retries?, ~slow?, mocha)
 
-    let done_fn = (~error=?, ()) => done_callback'(Js.Nullable.fromOption(error))
-    done_callback(done_fn)
+    let done_fn = (~error=?, ()) => doneCallback'(Js.Nullable.fromOption(error))
+    doneCallback(done_fn)
   })
 
-let makeAsyncAnon: Fn_Type.internal_callback_anon => Fn_Type.fn_anon<
+let makeAsyncHook: FunctionType.internal_callback_anon => FunctionType.hookFunction<
   (~error: Js.Exn.t=?, unit) => unit,
   unit,
-> = (fn, ~timeout=?, ~retries=?, ~slow=?, done_callback) =>
-  fn(.@this (mocha, done_callback') => {
+> = (fn, ~timeout=?, ~retries=?, ~slow=?, doneCallback) =>
+  fn(.@this (mocha, doneCallback') => {
     applyOptions(~timeout?, ~retries?, ~slow?, mocha)
 
-    let done_fn = (~error=?, ()) => done_callback'(Js.Nullable.fromOption(error))
-    done_callback(done_fn)
+    let done_fn = (~error=?, ()) => doneCallback'(Js.Nullable.fromOption(error))
+    doneCallback(done_fn)
   })

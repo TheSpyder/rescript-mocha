@@ -25,7 +25,7 @@ describe("Promise", () => {
       ) |> ignore
     )
 
-  describe("Success", () => it("should be successful", () => delay(() => Assert.equal(3, 3))))
+  describe("Success", () => it("should be successful", () => delay(() => Assert.strictEqual(3, 3))))
 
   describe_skip("Error", () => it("should error out", () => delay_reject()))
 

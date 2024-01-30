@@ -12,21 +12,21 @@ npm install rescript-mocha --save-dev
 
 ```rescript
 open RescriptMocha
-let {it:it', it_skip:it_skip'} = module (Promise)
 open Mocha
 open Belt
 
 describe("Some Test Suite", () =>
   describe("List.map", () => {
     it("should map the values", () =>
-      Assert.deep_equal(Array.map([1, 2, 3], (i) => i * 2), [2, 4, 6])
+      Assert.deepEqual(Array.map([1, 2, 3], (i) => i * 2), [2, 4, 6])
     )
 
     it("should work with an empty list", () =>
-      Assert.deep_equal(Array.map([], (i) => i * 2), [])
+      Assert.deepEqual(Array.map([], (i) => i * 2), [])
     )
 
-    it'("should be successful", () =>
+    open! Promise
+    it("should be successful", () =>
       Js.Promise.make((~resolve, ~reject as _) =>
         Js.Global.setTimeout(() => {
           Assert.equal(3, 3)

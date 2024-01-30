@@ -1,70 +1,42 @@
-module Labels = {
-  @module("assert")
-  external equal: (~actual: 'a, ~expected: 'a, ~message: string=?) => unit = "equal"
-  @module("assert")
-  external notEqual: (~actual: 'a, ~expected: 'a, ~message: string=?) => unit = "notEqual"
+@deprecated("use strictEqual instead") @module("assert")
+external equal: ('a, 'a, ~message: string=?) => unit = "equal"
 
-  @module("assert")
-  external deepEqual: (~actual: 'a, ~expected: 'a, ~message: string=?) => unit = "deepEqual"
-  @module("assert")
-  external notDeepEqual: (~actual: 'a, ~expected: 'a, ~message: string=?) => unit = "notDeepEqual"
+@deprecated("use notStrictEqual instead") @module("assert")
+external notEqual: ('a, 'a, ~message: string=?) => unit = "notEqual"
 
-  @module("assert")
-  external strictEqual: (~actual: 'a, ~expected: 'a, ~message: string=?) => unit = "strictEqual"
-  @module("assert")
-  external notStrictEqual: (~actual: 'a, ~expected: 'a, ~message: string=?) => unit =
-    "notStrictEqual"
+@deprecated("use deepStrictEqual instead") @module("assert")
+external deepEqual: ('a, 'a, ~message: string=?) => unit = "deepEqual"
 
-  @module("assert")
-  external deepStrictEqual: (~actual: 'a, ~expected: 'a, ~message: string=?) => unit =
-    "deepStrictEqual"
-  @module("assert")
-  external notDeepStrictEqual: (~actual: 'a, ~expected: 'a, ~message: string=?) => unit =
-    "notDeepStrictEqual"
+@deprecated("use notDeepStrictEqual instead") @module("assert")
+external notDeepEqual: ('a, 'a, ~message: string=?) => unit = "notDeepEqual"
 
-  @module("assert") external ifError: (~value: 'a) => unit = "ifError"
+@module("assert")
+external strictEqual: ('a, 'a, ~message: string=?) => unit = "strictEqual"
 
-  @module("assert")
-  external throws: (~block: 'a => 'b, ~error: Js.Exn.t, ~message: string=?) => unit = "throws"
-  @module("assert")
-  external doesNotThrow: (~block: 'a => 'b, ~error: Js.Exn.t, ~message: string=?) => unit =
-    "doesNotThrow"
+@module("assert")
+external notStrictEqual: ('a, 'a, ~message: string=?) => unit = "notStrictEqual"
 
-  @module("assert") external ok: (~value: 'a) => unit = "ok"
-  @module("assert") external fail: (~message: 'a) => unit = "fail"
-  @module("assert")
-  external fail': (
-    ~actual: 'a,
-    ~expected: 'a,
-    ~message: string=?,
-    ~operator: string=?,
-    ~stackStartFn: 'b => 'c=?,
-  ) => unit = "fail"
-}
+@module("assert")
+external deepStrictEqual: ('a, 'a, ~message: string=?) => unit = "deepStrictEqual"
 
-let equal = (~message=?, actual, expected) => Labels.equal(~actual, ~expected, ~message?)
-and notEqual = (~message=?, actual, expected) => Labels.notEqual(~actual, ~expected, ~message?)
+@module("assert")
+external notDeepStrictEqual: ('a, 'a, ~message: string=?) => unit = "notDeepStrictEqual"
 
-let deepEqual = (~message=?, actual, expected) => Labels.deepEqual(~actual, ~expected, ~message?)
-and notDeepEqual = (~message=?, actual, expected) =>
-  Labels.notDeepEqual(~actual, ~expected, ~message?)
+@module("assert") external ifError: (~value: 'a) => unit = "ifError"
 
-let deepStrictEqual = (~message=?, actual, expected) =>
-  Labels.deepStrictEqual(~actual, ~expected, ~message?)
-and notDeepStrictEqual = (~message=?, actual, expected) =>
-  Labels.notDeepStrictEqual(~actual, ~expected, ~message?)
+@module("assert")
+external throws: ('a => 'b, Js.Exn.t, ~message: string=?) => unit = "throws"
+@module("assert")
+external doesNotThrow: ('a => 'b, Js.Exn.t, ~message: string=?) => unit = "doesNotThrow"
 
-let strictEqual = (~message=?, actual, expected) =>
-  Labels.strictEqual(~actual, ~expected, ~message?)
-and notStrictEqual = (~message=?, actual, expected) =>
-  Labels.notStrictEqual(~actual, ~expected, ~message?)
+@module("assert") external ok: 'a => unit = "ok"
+@module("assert") external fail: 'a => unit = "fail"
 
-let ifError = value => Labels.ifError(~value)
-
-let ok = value => Labels.ok(~value)
-and fail = message => Labels.fail(~message)
-and fail' = (~message=?, ~operator=?, ~stackStartFn=?, actual, expected) =>
-  Labels.fail'(~actual, ~expected, ~message?, ~operator?, ~stackStartFn?)
-
-let throws = (~message=?, block, error) => Labels.throws(~block, ~error, ~message?)
-and doesNotThrow = (~message=?, block, error) => Labels.doesNotThrow(~block, ~error, ~message?)
+@deprecated("use fail instead") @module("assert")
+external fail': (
+  'a,
+  'a,
+  ~message: string=?,
+  ~operator: string=?,
+  ~stackStartFn: 'b => 'c=?,
+) => unit = "fail"
