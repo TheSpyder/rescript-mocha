@@ -1,135 +1,173 @@
-let (describe, describe_skip) = {
-  open Mocha
-  (describe, describe_skip)
-}
-open Promise
+open Mocha
 
 exception RejectedError(string)
 
 describe("Promise", () => {
-  let empty = () => Js.Promise.make((~resolve, ~reject as _) => resolve(. true))
+  let empty = () => Js.Promise.make((~resolve, ~reject as _) => resolve())
 
   /* Calls given function after a small delay */
-  let delay = fn =>
-    Js.Promise.make((~resolve, ~reject as _) => Js.Global.setTimeout(() => {
-        fn()
-        resolve(. true)
-      }, 300) |> ignore)
+  let delay = fn => {
+    Js.Promise.make((~resolve, ~reject as _) =>
+      ignore(
+        Js.Global.setTimeout(
+          () => {
+            fn()
+            resolve()
+          },
+          300,
+        ),
+      )
+    )
+  }
 
   /* Rejects the promise after a small delay */
   let delay_reject = () =>
     Js.Promise.make((~resolve as _, ~reject) =>
-      Js.Global.setTimeout(
-        () => reject(. RejectedError("promise successfully rejected")),
-        300,
-      ) |> ignore
+      ignore(
+        Js.Global.setTimeout(() => reject(RejectedError("promise successfully rejected")), 300),
+      )
     )
 
-  describe("Success", () => it("should be successful", () => delay(() => Assert.equal(3, 3))))
+  describe("Success", () => {
+    Async.it("should be successful", () => delay(() => Assert.equal(3, 3)))
+  })
 
-  describe_skip("Error", () => it("should error out", () => delay_reject()))
+  describe_skip("Error", () => Async.it("should error out", () => delay_reject()))
 
   describe("Hooks", () => {
     let hooks = ref({
       "before": false,
-      "before_each": 0,
+      "beforeEach": 0,
       "after": false,
-      "after_each": 0,
+      "afterEach": 0,
     })
 
-    before(() =>
-      delay(() => hooks := {"before": true, "before_each": 0, "after": false, "after_each": 0})
+    Async.before(
+      () => delay(() => hooks := {"before": true, "beforeEach": 0, "after": false, "afterEach": 0}),
     )
 
-    before_each(() =>
-      delay(() => {
-        let hooks' = hooks.contents
-        hooks :=
-          {
-            "before": hooks'["before"],
-            "before_each": hooks'["before_each"] + 1,
-            "after": hooks'["after"],
-            "after_each": hooks'["after_each"],
-          }
-      })
+    Async.beforeEach(
+      () =>
+        delay(
+          () => {
+            let hooks' = hooks.contents
+            hooks :=
+              {
+                "before": hooks'["before"],
+                "beforeEach": hooks'["beforeEach"] + 1,
+                "after": hooks'["after"],
+                "afterEach": hooks'["afterEach"],
+              }
+          },
+        ),
     )
 
-    it("is the first test", () => empty())
-    it("is the second test", () => empty())
-    it("is the third test", () => empty())
+    Async.it("is the first test", () => empty())
+    Async.it("is the second test", () => empty())
+    Async.it("is the third test", () => empty())
 
-    after_each(() =>
-      delay(() => {
-        let hooks' = hooks.contents
-        hooks :=
-          {
-            "before": hooks'["before"],
-            "before_each": hooks'["before_each"],
-            "after": hooks'["after"],
-            "after_each": hooks'["after_each"] + 1,
-          }
-      })
+    Async.afterEach(
+      () =>
+        delay(
+          () => {
+            let hooks' = hooks.contents
+            hooks :=
+              {
+                "before": hooks'["before"],
+                "beforeEach": hooks'["beforeEach"],
+                "after": hooks'["after"],
+                "afterEach": hooks'["afterEach"] + 1,
+              }
+          },
+        ),
     )
 
-    after(() =>
-      delay(() => {
-        let hooks' = hooks.contents
-        hooks :=
-          {
-            "before": hooks'["before"],
-            "before_each": hooks'["before_each"],
-            "after": true,
-            "after_each": hooks'["after_each"],
-          }
+    Async.after(
+      () =>
+        delay(
+          () => {
+            let hooks' = hooks.contents
+            hooks :=
+              {
+                "before": hooks'["before"],
+                "beforeEach": hooks'["beforeEach"],
+                "after": true,
+                "afterEach": hooks'["afterEach"],
+              }
 
-        /* TODO: this is pretty ugly, caused by (facebook/reason issue #2108) */
-        let hooks'' = hooks.contents
-        Assert.ok(hooks''["before"])
-        Assert.equal(hooks''["before_each"], 3)
-        Assert.equal(hooks''["after_each"], 3)
-        Assert.ok(hooks''["after"])
-      })
+            /* TODO: this is pretty ugly, caused by (facebook/reason issue #2108) */
+            let hooks'' = hooks.contents
+            Assert.ok(hooks''["before"])
+            Assert.equal(hooks''["beforeEach"], 3)
+            Assert.equal(hooks''["afterEach"], 3)
+            Assert.ok(hooks''["after"])
+          },
+        ),
     )
   })
 
   describe("Timeout", () => {
-    it_skip("should time out", ~timeout=50, () =>
-      Js.Promise.make((~resolve, ~reject as _) =>
-        Js.Global.setTimeout(() => resolve(. true), 51) |> ignore
-      )
+    Async.it_skip(
+      "should time out",
+      () => {
+        This.timeout(50)
+        Js.Promise.make(
+          (~resolve, ~reject as _) => ignore(Js.Global.setTimeout(() => resolve(), 51)),
+        )
+      },
     )
 
-    it("should not time out", ~timeout=50, () =>
-      Js.Promise.make((~resolve, ~reject as _) =>
-        Js.Global.setTimeout(() => resolve(. true), 40) |> ignore
-      )
+    Async.it(
+      "should not time out",
+      () => {
+        This.timeout(50)
+        Js.Promise.make(
+          (~resolve, ~reject as _) => ignore(Js.Global.setTimeout(() => resolve(), 40)),
+        )
+      },
     )
   })
 
   describe("Retries", () => {
     let retry_count = ref(0)
-    it("should succeed", ~retries=2, () =>
-      Js.Promise.make((~resolve, ~reject as _) => {
-        retry_count := retry_count.contents + 1
-        Assert.ok(retry_count.contents == 1)
-        resolve(. true)
-      })
+    Async.it(
+      "should succeed",
+      () => {
+        This.retries(2)
+        Js.Promise.make(
+          (~resolve, ~reject as _) => {
+            retry_count := retry_count.contents + 1
+            Assert.ok(retry_count.contents == 1)
+            resolve()
+          },
+        )
+      },
     )
 
-    it_skip("should fail", ~retries=3, () =>
-      Js.Promise.make((~resolve, ~reject as _) => {
-        retry_count := retry_count.contents + 1
-        Assert.ok(retry_count.contents == 6)
-        resolve(. true)
-      })
+    Async.it_skip(
+      "should fail",
+      () => {
+        This.retries(3)
+        Js.Promise.make(
+          (~resolve, ~reject as _) => {
+            retry_count := retry_count.contents + 1
+            Assert.ok(retry_count.contents == 6)
+            resolve()
+          },
+        )
+      },
     )
   })
 
   describe("Slow", () =>
-    it("should be considered slow", ~slow=50, () =>
-      Js.Promise.make((~resolve, ~reject as _) =>
-        Js.Global.setTimeout(() => resolve(. true), 60) |> ignore
-      )
+    Async.it(
+      "should be considered slow",
+      () => {
+        This.slow(50)
+        Js.Promise.make(
+          (~resolve, ~reject as _) => ignore(Js.Global.setTimeout(() => resolve(), 60)),
+        )
+      },
     )
   )
 })
