@@ -11,10 +11,10 @@
   "scripts": {
     "clean": "rescript clean",
     "build": "rescript",
-    "watch": "rescript build -w",
-    "start": "rescript build -w",
+    "watch": "rescript -w",
+    "start": "rescript -w",
     "test": "rescript && mocha",
-    "prepublishOnly": "yarn clean && yarn test"
+    "prepublishOnly": "npm run clean && npm run test"
   },
   "mocha": {
     "recursive": true,
@@ -35,7 +35,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "rescript": "^11.0.0"
+    "rescript": "11.1.2"
   },
   "dependencies": {
     "mocha": "^10.4.0"

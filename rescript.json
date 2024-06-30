@@ -1,7 +1,6 @@
 {
   "name": "rescript-mocha",
-  "version": "0.10.0",
-  "namespace": true,
+  "namespace": false,
   "sources": [
     {
       "dir": "src"
@@ -12,7 +11,7 @@
     }
   ],
   "package-specs": {
-    "module": "es6",
+    "module": "esmodule",
     "in-source": true,
     "suffix": ".mjs"
   },
@@ -20,6 +19,5 @@
     "number": "A-4-40-41-42-43+101-102-103",
     "error": true
   },
-  "bs-dependencies": [],
-  "uncurried": false
+  "bs-dependencies": []
 }
